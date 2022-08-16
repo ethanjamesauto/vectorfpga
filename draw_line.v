@@ -4,7 +4,8 @@ module draw_line(
 
     input [11:0] x,
     input [11:0] y,
-    input strobe, //draw the line to the point
+    input draw, //draw the line to the point
+	input jump,
 
     output ready //ready for the next point
 );
@@ -24,8 +25,11 @@ module draw_line(
 		.ready(dac_ready)
 	);
 
+	wire line_reset;
+	assign line_reset = reset || jump;
+
 	wire line_strobe;
-	assign line_strobe = strobe;
+	assign line_strobe = draw;
 
 	wire line_ready;
 	assign ready = line_ready;
@@ -36,7 +40,7 @@ module draw_line(
     
 	lineto line_gen(
 		.clk(clk),
-		.reset(reset),
+		.reset(line_reset),
 		.strobe(line_strobe),
 		.halt(line_halt),
 		.x_in(x),

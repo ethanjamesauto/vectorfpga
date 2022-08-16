@@ -2,26 +2,43 @@ module vectorfpga(
 	input clk,
 	input reset
 );
-	reg strobe = 0;
+	reg draw = 0;
+	reg jump = 0;
 	wire ready;
-	reg [11:0] x = 5;
-	reg [11:0] y = 10;
+	reg [11:0] x = 0;
+	reg [11:0] y = 0;
 	draw_line line_draw(
 		.clk(clk),
 		.reset(reset),
-		.strobe(strobe),
+		.draw(draw),
+		.jump(jump),
 		.ready(ready),
 		.x(x),
 		.y(y)
 	);
 
+	reg [1:0] state = 0;
 	always@(posedge clk) begin
-		if (!reset && !strobe && ready) begin
-			strobe <= 1;
-			x <= x + 12'd4;
-			y <= y + 12'd4;
+		if (!reset && !draw && ready) begin
+			draw <= 1;
+			if(state == 0) begin
+				x <= 0;
+				y <= 0;
+			end else if (state == 1) begin
+				x <= 10;
+				y <= 0;
+			end else if (state == 2) begin
+				x <= 10;
+				y <= 10;
+			end else begin
+				jump <= 1;
+				x <= 0;
+				y <= 10;
+			end
+			state <= state + 1;
 		end else begin
-			strobe <= 0;
+			draw <= 0;
+			jump <= 0;
 		end
 	end
 endmodule
