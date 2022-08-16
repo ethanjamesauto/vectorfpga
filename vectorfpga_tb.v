@@ -2,7 +2,7 @@
 module vectorfpga_tb;
 	reg clk = 0;
 	initial begin
-		repeat(512) begin
+		repeat(2048) begin
 			#1 clk = !clk;
 		end
 	end
@@ -10,7 +10,7 @@ module vectorfpga_tb;
 	reg reset = 0;
 	initial begin
 		#1 reset = 1;
-		#3 reset = 0;
+		#2 reset = 0;
 	end
 
 	initial begin
