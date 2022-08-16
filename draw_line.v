@@ -26,7 +26,10 @@ module draw_line(
 	);
 
 	wire line_reset;
-	assign line_reset = reset || jump;
+	assign line_reset = reset || doJump;
+
+	reg queueJump = 0;
+	reg doJump = 0;
 
 	wire line_strobe;
 	assign line_strobe = draw;
@@ -57,6 +60,16 @@ module draw_line(
 	always @(posedge clk) begin
 		if (reset) begin
 
+		end else if (jump) begin
+			queueJump <= 1;
+		end
+
+		//TODO: find a waay to do this in a single clock cycle???
+		if (queueJump && dac_ready) begin
+			queueJump <= 0;
+			doJump <= 1;
+		end else begin
+			doJump <= 0;
 		end
 	end
 endmodule
