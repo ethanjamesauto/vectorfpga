@@ -8,6 +8,7 @@ module draw_line(
 
     output ready //ready for the next point
 );
+
 	reg dac_enable = 1;
     wire [11:0] dac_value;
 	wire dac_axis; //selects the dac channel (2 channels)
@@ -23,13 +24,13 @@ module draw_line(
 		.ready(dac_ready)
 	);
 
-	reg line_strobe = 0;
-	reg [11:0] x_in = 0;
-	reg [11:0] y_in = 0;
+	wire line_strobe;
+	assign line_strobe = strobe;
 
 	wire line_ready;
+	assign ready = line_ready;
+	
 	wire line_halt = !dac_ready;
-	//wire line_axis;
 	wire [11:0] x_out;
 	wire [11:0] y_out;
     
@@ -38,8 +39,8 @@ module draw_line(
 		.reset(reset),
 		.strobe(line_strobe),
 		.halt(line_halt),
-		.x_in(x_in),
-		.y_in(y_in),
+		.x_in(x),
+		.y_in(y),
 		.x_out(x_out),
 		.y_out(y_out),
 
@@ -52,12 +53,6 @@ module draw_line(
 	always @(posedge clk) begin
 		if (reset) begin
 
-		end else if (line_ready && !line_strobe && !reset) begin
-			line_strobe <= 1;
-			x_in <= x_in + 12'd4;
-			y_in <= y_in + 12'd4;
-		end else begin
-			line_strobe <= 0;
 		end
 	end
 endmodule
