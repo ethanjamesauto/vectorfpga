@@ -27,10 +27,10 @@ module vectorfpga(
 		end
 	end
 
-	always@(posedge ready) begin
+	always@(negedge ready) begin
 		if (!reset) begin
 			x <= x + 1;
-			y <= y + 1;
+			y <= y + 2;
 			jump <= 1;
 		end;
 	end
