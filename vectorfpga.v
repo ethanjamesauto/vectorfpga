@@ -29,8 +29,8 @@ module vectorfpga(
 
 	always@(posedge ready) begin
 		if (!reset) begin
-			x <= x + 5;
-			y <= y + 10;
+			x <= x + 1;
+			y <= y + 1;
 			jump <= 1;
 		end;
 	end

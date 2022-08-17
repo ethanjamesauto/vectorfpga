@@ -59,27 +59,27 @@ module control(
     reg jumping;
     reg drawing;
 
-    always@(posedge clk) begin
-        if (reset) begin
-            dac_enable <= 0;
-            dac_axis <= 0;
-            control_ready <= 1;
-            line_strobe <= 0;
-            line_halt <= 0;
-
-            jumping <= 0;
-            drawing <= 0;
-        end else if (jumping) begin
+    always@(posedge clk && !reset) begin            
+        if (jumping) begin
             if (dac_axis == 1 && dac_ready) begin
                 dac_enable <= 0;
                 control_ready <= 1;
                 jumping <= 0;
             end else if (dac_enable == 1) begin
                 dac_axis <= 1;
-            end else begin
-                dac_enable <= 1;
             end
         end
+    end
+
+    always@(posedge reset) begin
+        dac_enable <= 0;
+        dac_axis <= 0;
+        control_ready <= 1;
+        line_strobe <= 0;
+        line_halt <= 0;
+
+        jumping <= 0;
+        drawing <= 0;
     end
 
     always@(posedge jump) begin
@@ -87,6 +87,7 @@ module control(
             control_ready <= 0;
             jumping <= 1;
             dac_axis <= 0;
+            dac_enable <= 1;
         end
     end
 
