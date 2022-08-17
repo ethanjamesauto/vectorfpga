@@ -33,6 +33,7 @@ module mcp4922(
 			clk_pin <= 0;
 		end else
 		if (strobe) begin
+			$display("channel: %d, value: %d", axis, value);
 			cmd <= { axis, BUFFERED, GAIN, SHUTDOWN, value };
 			bits <= 16;
 			clk_pin <= 0;

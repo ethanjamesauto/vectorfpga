@@ -17,6 +17,8 @@ module vectorfpga(
 		.y(y)
 	);
 
+	parameter size = 50;
+
 	reg [1:0] state = 0;
 	always@(posedge clk) begin
 		if (!reset && !draw && ready) begin
@@ -25,15 +27,15 @@ module vectorfpga(
 				x <= 0;
 				y <= 0;
 			end else if (state == 1) begin
-				x <= 10;
+				x <= size;
 				y <= 0;
 			end else if (state == 2) begin
-				x <= 10;
-				y <= 10;
+				x <= size;
+				y <= size;
 			end else begin
 				jump <= 1;
 				x <= 0;
-				y <= 10;
+				y <= size;
 			end
 			state <= state + 1;
 		end else begin
