@@ -76,12 +76,10 @@ module control(
                 jumping <= 0;
             end else if (dac_enable == 1) begin
                 dac_axis <= 1;
+            end else begin
+                dac_enable <= 1;
             end
         end
-    end
-
-    always@(posedge jumping) begin
-        #2 dac_enable <= 1;
     end
 
     always@(posedge jump) begin

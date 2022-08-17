@@ -22,12 +22,16 @@ module vectorfpga(
 
 	reg [1:0] state = 0;
 	always@(posedge clk) begin
-		if (!reset && ready) begin
+		if (!reset && jump) begin
+			jump <= 0;
+		end
+	end
+
+	always@(posedge ready) begin
+		if (!reset) begin
 			x <= x + 5;
 			y <= y + 10;
 			jump <= 1;
-		end else begin
-			jump <= 0;
-		end
+		end;
 	end
 endmodule
