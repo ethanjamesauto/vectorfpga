@@ -66,7 +66,7 @@ module lineto(
 	input reset,
 
 	input strobe,
-	input halt,
+	input next,
 	input [BITS-1:0] x_in,
 	input [BITS-1:0] y_in,
 
@@ -130,8 +130,11 @@ module lineto(
 				-
 				((y_in > y_out) ? (y_in - y_out) : (y_out - y_in));
 
-		end else
-		if (!ready && !halt) begin
+		end
+	end
+
+	always@(posedge next) begin
+		if (!ready) begin
 			// move towards the dstination point
 			if (err2 > -dy)
 			begin

@@ -27,11 +27,32 @@ module vectorfpga(
 		end
 	end
 
-	always@(negedge ready) begin
+	/*always@(negedge ready) begin
 		if (!reset) begin
 			x <= x + 1;
 			y <= y + 2;
 			jump <= 1;
 		end;
+	end*/
+
+	reg choice = 0;
+	always@(negedge ready) begin
+		if (!reset) begin
+			x <= x + 10;
+			y <= y + 15;
+			//done <= 1;
+			if (choice) begin
+				jump <= 1;
+			end else begin
+				draw <= 1;
+			end
+			choice += 1;
+		end;
 	end
+
+	always@(posedge clk) begin
+		draw <= 0;
+		jump <= 0;
+	end
+		
 endmodule

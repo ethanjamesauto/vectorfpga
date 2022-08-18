@@ -35,17 +35,18 @@ module control(
     //controls for the line generator
     wire line_reset = reset || jump;
     reg line_strobe;
-    reg line_halt;
     wire [11:0] x_out;
     wire [11:0] y_out;
     wire line_ready;
     wire line_axis;
 
+    reg line_next = 0;
+
     lineto line_gen(
 		.clk(clk),
 		.reset(line_reset),
 		.strobe(line_strobe),
-		.halt(line_halt),
+		.next(line_next),
 		.x_in(x),
 		.y_in(y),
 		.x_out(x_out),
@@ -56,6 +57,16 @@ module control(
 	);
 
     //state controls
+    always@(posedge reset) begin
+        dac_enable <= 1;
+        dac_axis <= 0;
+        control_ready <= 1;
+        line_strobe <= 0;
+
+        jumping <= 0;
+        drawing <= 0;
+    end
+
     reg jumping;
     reg drawing;
 
@@ -65,21 +76,8 @@ module control(
                 dac_axis <= 1;
                 control_ready <= 1;
                 jumping <= 0;
-            end else begin
-                dac_axis <= 0;
             end
         end
-    end
-
-    always@(posedge reset) begin
-        dac_enable <= 1;
-        dac_axis <= 0;
-        control_ready <= 1;
-        line_strobe <= 0;
-        line_halt <= 0;
-
-        jumping <= 0;
-        drawing <= 0;
     end
 
     always@(posedge jump) begin
@@ -89,5 +87,35 @@ module control(
             dac_axis <= 0;
         end
     end
+
+    always@(posedge clk && !reset) begin     
+        if (drawing) begin
+            line_strobe <= 0;
+            dac_axis <= line_axis;
+            if (dac_ready && !ready) begin
+                line_next <= 1;
+                if (line_ready) begin
+                    drawing <= 0;
+                end
+            end
+            if (line_next) begin
+                line_next <= 0;
+            end
+        end       
+    end
+
+    always@(posedge draw) begin
+        if (!reset) begin
+            line_strobe <= 1;
+            drawing <= 1;
+        end
+    end
+
+    always@(negedge line_strobe) begin
+        if (drawing) begin
+            line_next <= 1;
+        end
+    end
+    
 
 endmodule
