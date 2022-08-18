@@ -21,33 +21,27 @@ module vectorfpga(
 	parameter size = 50;
 
 	reg [1:0] state = 0;
-	always@(posedge clk) begin
-		if (!reset && jump) begin
-			jump <= 0;
-		end
-	end
-
-	/*always@(negedge ready) begin
-		if (!reset) begin
-			x <= x + 1;
-			y <= y + 2;
-			jump <= 1;
-		end;
-	end*/
-
-	reg choice = 0;
 	always@(negedge ready) begin
 		if (!reset) begin
-			x <= x + 10;
-			y <= y + 15;
-			//done <= 1;
-			if (choice) begin
+			if (state == 0) begin
+				x <= size;
+				y <= 0;
 				jump <= 1;
+			end else if (state == 1) begin
+				x <= 0;
+				y <= size - 10;
+				draw <= 1;
+			end else if (state == 2) begin
+				x <= size;
+				y <= size;
+				draw <= 1;
 			end else begin
+				x <= 0;
+				y <= 0;
 				draw <= 1;
 			end
-			choice += 1;
-		end;
+			state <= state + 1;
+		end
 	end
 
 	always@(posedge clk) begin

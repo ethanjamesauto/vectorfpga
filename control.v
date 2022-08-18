@@ -40,7 +40,7 @@ module control(
     wire line_ready;
     wire line_axis;
 
-    reg line_next = 0;
+    reg line_next;
 
     lineto line_gen(
 		.clk(clk),
@@ -62,7 +62,7 @@ module control(
         dac_axis <= 0;
         control_ready <= 1;
         line_strobe <= 0;
-
+        line_next <= 0;
         jumping <= 0;
         drawing <= 0;
     end
