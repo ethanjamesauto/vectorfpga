@@ -29,10 +29,8 @@ module control(
     wire line_ready;
     wire line_axis;
     reg line_next;
-
-    reg control_ready;
     
-    assign ready = control_ready && dac_ready && line_ready;    
+    assign ready = !jumping && dac_ready && line_ready;    
     assign dac_value = dac_axis ? y_out : x_out;
 
     mcp4922 dac(
@@ -58,29 +56,28 @@ module control(
 		.axis(line_axis)
 	);
 
-    always@(posedge reset) begin
-        dac_enable <= 1;
-        dac_axis <= 0;
-        control_ready <= 1;
-        line_strobe <= 0;
-        line_next <= 0;
-        jumping <= 0;
-        drawing <= 0;
+    always@(posedge clk) begin
+        if (reset) begin
+            dac_enable <= 1;
+            dac_axis <= 0;
+            line_strobe <= 0;
+            line_next <= 0;
+            jumping <= 0;
+            drawing <= 0;
+        end
     end
 
     always@(posedge clk) begin            
         if (jumping && dac_ready && !reset) begin
             if (dac_axis == 0) begin
                 dac_axis <= 1;
-                control_ready <= 1;
                 jumping <= 0;
             end
         end
     end
 
-    always@(posedge jump) begin
-        if (!reset) begin
-            control_ready <= 0;
+    always@(posedge clk) begin
+        if (jump && !reset) begin
             jumping <= 1;
             dac_axis <= 0;
         end
@@ -88,7 +85,6 @@ module control(
 
     always@(posedge clk) begin     
         if (drawing && !reset) begin
-            line_strobe <= 0;
             dac_axis <= line_axis;
             if (dac_ready && !ready) begin
                 line_next <= 1;
@@ -102,16 +98,15 @@ module control(
         end       
     end
 
-    always@(posedge draw) begin
-        if (!reset) begin
+    always@(posedge clk) begin
+        if (!reset && draw) begin
             line_strobe <= 1;
             drawing <= 1;
         end
-    end
-
-    always@(negedge line_strobe) begin
-        if (drawing) begin
+        if (line_strobe) begin
+            line_strobe <= 0;
             line_next <= 1;
         end
     end
+
 endmodule

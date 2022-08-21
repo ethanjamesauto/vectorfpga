@@ -42,9 +42,6 @@ module vectorfpga(
 			end
 			state <= state + 1;
 		end
-	end
-
-	always@(posedge clk) begin
 		if (jump) begin
 			jump <= 0;
 		end
