@@ -2,11 +2,11 @@ module vectorfpga(
 	input clk,
 	input reset
 );
-	reg draw = 0;
-	reg jump = 0;
+	reg draw;
+	reg jump;
 	wire ready;
-	reg [11:0] x = 0;
-	reg [11:0] y = 0;
+	reg [11:0] x;
+	reg [11:0] y;
 
 	control line_draw(
 		.clk(clk),
@@ -22,7 +22,12 @@ module vectorfpga(
 
 	reg [1:0] state = 0;
 	always@(posedge clk) begin
-		if (!reset && ready) begin
+		if (reset) begin
+			draw <= 0;
+			jump <= 0;
+			x <= 0;
+			y <= 0;
+		end else if (!reset && ready) begin
 			if (state == 0) begin
 				x <= size;
 				y <= 10;
