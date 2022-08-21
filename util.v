@@ -103,7 +103,12 @@ module lineto(
 		//$monitor("%d %d %d %d %d", x_out, y_out, dx, dy, err);
 		if (reset) begin
 			// reset will latch the current inputs
-			
+			x_dst <= x_in;
+			y_dst <= y_in;
+			x_out <= x_in;
+			y_out <= y_in;
+			err <= 0;
+			axis <= 0;
 		end else
 		if (strobe) begin
 			x_dst <= x_in;
@@ -130,11 +135,8 @@ module lineto(
 				-
 				((y_in > y_out) ? (y_in - y_out) : (y_out - y_in));
 
-		end
-	end
-
-	always@(posedge next) begin
-		if (!ready) begin
+		end else
+		if (!ready && next) begin
 			// move towards the dstination point
 			if (err2 > -dy)
 			begin
@@ -149,14 +151,5 @@ module lineto(
 				axis <= 1;
 			end
 		end
-	end
-
-	always@(posedge reset) begin
-		x_dst <= x_in;
-		y_dst <= y_in;
-		x_out <= x_in;
-		y_out <= y_in;
-		err <= 0;
-		axis <= 0;
 	end
 endmodule
