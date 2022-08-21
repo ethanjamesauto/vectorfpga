@@ -67,13 +67,13 @@ module lineto(
 
 	input strobe,
 	input next,
-	input [BITS-1:0] x_in,
-	input [BITS-1:0] y_in,
+	input [12-1:0] x_in, //TODO: get the macro working again
+	input [12-1:0] y_in,
 
 	output ready, // set when done
-	output axis, // did the x or y value change
-	output [BITS-1:0] x_out,
-	output [BITS-1:0] y_out
+	output reg axis, // did the x or y value change
+	output reg [12-1:0] x_out,
+	output reg [12-1:0] y_out
 );
 	parameter BITS = 12;
 
@@ -82,14 +82,10 @@ module lineto(
 	reg [BITS-1:0] x_dst;
 	reg [BITS-1:0] y_dst;
 
-	reg [BITS-1:0] x_out;
-	reg [BITS-1:0] y_out;
-
 	// once the output reaches the dstination, it is ready
 	// for a new point.
 	assign ready = (x_dst == x_out) && (y_dst == y_out);
 
-	reg axis;
 	reg sx;
 	reg sy;
 

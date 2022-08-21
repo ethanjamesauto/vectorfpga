@@ -21,8 +21,8 @@ module vectorfpga(
 	parameter size = 50;
 
 	reg [1:0] state = 0;
-	always@(negedge ready) begin
-		if (!reset) begin
+	always@(posedge clk) begin
+		if (!reset && ready) begin
 			if (state == 0) begin
 				x <= size;
 				y <= 10;

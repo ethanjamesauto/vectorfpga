@@ -10,18 +10,30 @@ module control(
 
     output ready
 );
-    reg control_ready;
-    assign ready = control_ready && dac_ready && line_ready;
+    reg jumping;
+    reg drawing;
 
     //controls for the DAC
     wire [11:0] dac_value;
-    assign dac_value = dac_axis ? y_out : x_out;
-
     reg dac_axis;
-
     reg dac_enable;
     wire dac_ready;
     wire dac_strobe = dac_ready && dac_enable;
+
+
+    //controls for the line generator
+    wire line_reset = reset || jump;
+    reg line_strobe;
+    wire [11:0] x_out;
+    wire [11:0] y_out;
+    wire line_ready;
+    wire line_axis;
+    reg line_next;
+
+    reg control_ready;
+    
+    assign ready = control_ready && dac_ready && line_ready;    
+    assign dac_value = dac_axis ? y_out : x_out;
 
     mcp4922 dac(
 		.clk(clk),
@@ -31,16 +43,6 @@ module control(
 		.strobe(dac_strobe),
 		.ready(dac_ready)
 	);
-
-    //controls for the line generator
-    wire line_reset = reset || jump;
-    reg line_strobe;
-    wire [11:0] x_out;
-    wire [11:0] y_out;
-    wire line_ready;
-    wire line_axis;
-
-    reg line_next;
 
     lineto line_gen(
 		.clk(clk),
@@ -56,7 +58,6 @@ module control(
 		.axis(line_axis)
 	);
 
-    //state controls
     always@(posedge reset) begin
         dac_enable <= 1;
         dac_axis <= 0;
@@ -67,11 +68,8 @@ module control(
         drawing <= 0;
     end
 
-    reg jumping;
-    reg drawing;
-
-    always@(posedge clk && !reset) begin            
-        if (jumping && dac_ready) begin
+    always@(posedge clk) begin            
+        if (jumping && dac_ready && !reset) begin
             if (dac_axis == 0) begin
                 dac_axis <= 1;
                 control_ready <= 1;
@@ -88,8 +86,8 @@ module control(
         end
     end
 
-    always@(posedge clk && !reset) begin     
-        if (drawing) begin
+    always@(posedge clk) begin     
+        if (drawing && !reset) begin
             line_strobe <= 0;
             dac_axis <= line_axis;
             if (dac_ready && !ready) begin
@@ -116,6 +114,4 @@ module control(
             line_next <= 1;
         end
     end
-    
-
 endmodule
