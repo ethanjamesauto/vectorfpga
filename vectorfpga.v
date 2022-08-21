@@ -25,7 +25,7 @@ module vectorfpga(
 		if (!reset) begin
 			if (state == 0) begin
 				x <= size;
-				y <= 0;
+				y <= 10;
 				jump <= 1;
 			end else if (state == 1) begin
 				x <= 0;
@@ -45,8 +45,12 @@ module vectorfpga(
 	end
 
 	always@(posedge clk) begin
-		draw <= 0;
-		jump <= 0;
+		if (jump) begin
+			jump <= 0;
+		end
+		if (draw) begin
+			draw <= 0;
+		end
 	end
 		
 endmodule
