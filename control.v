@@ -64,44 +64,34 @@ module control(
             line_next <= 0;
             jumping <= 0;
             drawing <= 0;
-        end
-    end
+        end 
 
-    always@(posedge clk) begin            
-        if (jumping && dac_ready && !reset) begin
-            if (dac_axis == 0) begin
-                dac_axis <= 1;
-                jumping <= 0;
-            end
-        end
-    end
-
-    always@(posedge clk) begin
-        if (jump && !reset) begin
+        //handle jumping
+        else if (jump) begin
             jumping <= 1;
+            drawing = 0; //make sure this is the case
             dac_axis <= 0;
+        end else if (jumping && dac_ready) begin
+            dac_axis <= 1;
+            jumping <= 0;
         end
-    end
 
-    always@(posedge clk) begin     
-        if (drawing && !reset) begin
+        //handle drawing
+        if (!reset && draw) begin
+            line_strobe <= 1;
+            drawing <= 1;
+        end
+        if (!reset && drawing) begin
             dac_axis <= line_axis;
             if (dac_ready && !ready) begin
                 line_next <= 1;
-                if (line_ready) begin
+                if (line_ready) begin //TODO: make this happen ASAP
                     drawing <= 0;
                 end
             end
             if (line_next) begin
                 line_next <= 0;
             end
-        end       
-    end
-
-    always@(posedge clk) begin
-        if (!reset && draw) begin
-            line_strobe <= 1;
-            drawing <= 1;
         end
         if (line_strobe) begin
             line_strobe <= 0;
