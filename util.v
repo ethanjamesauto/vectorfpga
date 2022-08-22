@@ -67,15 +67,15 @@ module lineto(
 
 	input strobe,
 	input next,
-	input [12-1:0] x_in, //TODO: get the macro working again
-	input [12-1:0] y_in,
+	input [11:0] x_in, //TODO: get the macro working again
+	input [11:0] y_in,
 
 	output ready, // set when done
 	output reg axis, // did the x or y value change
-	output reg [12-1:0] x_out,
-	output reg [12-1:0] y_out
+	output reg [11:0] x_out,
+	output reg [11:0] y_out
 );
-	parameter BITS = 12;
+	parameter BITS = 15;
 
 	reg [BITS-1:0] err;
 

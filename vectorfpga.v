@@ -1,6 +1,11 @@
 module vectorfpga(
 	input clk,
-	input reset
+	input reset,
+
+	// physical interface
+	output cs,
+	output dclk,
+	output data
 );
 	reg draw;
 	reg jump;
@@ -15,10 +20,14 @@ module vectorfpga(
 		.y(y),
 		.draw(draw),
 		.jump(jump),
-		.ready(ready)
+		.ready(ready),
+
+		.cs_pin(cs),
+		.clk_pin(dclk),
+		.data_pin(data)
 	);
 
-	parameter size = 50;
+	parameter size = 4095;
 
 	reg [1:0] state = 0;
 	always@(posedge clk) begin
@@ -30,11 +39,11 @@ module vectorfpga(
 		end else if (!reset && ready) begin
 			if (state == 0) begin
 				x <= size;
-				y <= 10;
+				y <= 400;
 				jump <= 1;
 			end else if (state == 1) begin
 				x <= 0;
-				y <= size - 10;
+				y <= size - 400;
 				draw <= 1;
 			end else if (state == 2) begin
 				x <= size;

@@ -8,7 +8,12 @@ module control(
     input jump,
     input draw,
 
-    output ready
+    output ready,
+
+    // physical interface
+	output cs_pin,
+	output clk_pin,
+	output data_pin
 );
     reg jumping;
     reg drawing;
@@ -39,7 +44,11 @@ module control(
 		.value(dac_value),
 		.axis(dac_axis),
 		.strobe(dac_strobe),
-		.ready(dac_ready)
+		.ready(dac_ready),
+
+        .cs_pin(cs_pin),
+        .clk_pin(clk_pin),
+        .data_pin(data_pin)
 	);
 
     lineto line_gen(

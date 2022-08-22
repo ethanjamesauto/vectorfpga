@@ -18,6 +18,9 @@ module vectorfpga_tb;
 		$dumpvars;
 	end
 
-	vectorfpga test(clk, reset);
+	vectorfpga test(
+		.clk(clk),
+		.reset(reset)
+	);
 	
 endmodule
