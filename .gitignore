@@ -1,4 +1,6 @@
 *.vpp
 *.vcd
 *.gtkw
+*.txt
 .vscode
+xilinx
