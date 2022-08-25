@@ -1,12 +1,27 @@
 module vectorfpga(
 	input clk,
-	input reset,
 
-	// physical interface
+	//UART input 
+	input rx,
+	output test,
+	output [7:0] rx_data,
+	
+	//DAC outputs
 	output cs,
 	output dclk,
 	output data
 );
+	reg reset = 0;
+	reg [1:0] reset_ctr = 0;
+	always@(posedge clk) begin
+		if (reset_ctr < 3) begin
+			reset_ctr = reset_ctr + 1;
+			reset <= 1;
+		end else begin
+			reset <= 0;
+		end
+	end
+
 	reg draw;
 	reg jump;
 	wire ready;
@@ -25,6 +40,13 @@ module vectorfpga(
 		.cs_pin(cs),
 		.clk_pin(dclk),
 		.data_pin(data)
+	);
+
+	uart_rx uart(
+		.i_Clock(clk),
+		.i_Rx_Serial(rx),
+		.o_Rx_DV(test),
+		.o_Rx_Byte(rx_data)
 	);
 
 	parameter size = 4095;
