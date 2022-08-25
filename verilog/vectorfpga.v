@@ -58,7 +58,7 @@ module vectorfpga(
 			jump <= 0;
 			x <= 0;
 			y <= 0;
-		end else if (!reset && ready) begin
+		end else if (ready) begin
 			if (state == 0) begin
 				x <= size;
 				y <= 400;
