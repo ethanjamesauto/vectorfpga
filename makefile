@@ -1,5 +1,5 @@
 all:
-	iverilog -o vectorfpga.vpp *.v
+	iverilog -o vectorfpga.vpp verilog/*.v
 	vvp vectorfpga.vpp > out.txt
 
 view: all
