@@ -1,11 +1,13 @@
-//`define IVERILOG
+`define IVERILOG
 `ifdef IVERILOG
 module uart_rx 
 (
   input        i_Clock,
   input        i_Rx_Serial,
   output reg      o_Rx_DV,
-  output reg [7:0] o_Rx_Byte
+  output reg [7:0] o_Rx_Byte,
+
+  output reg test
 );
 
 reg [7:0] k[19:0];
@@ -33,7 +35,7 @@ initial begin
   k[18] = 1;
   k[19] = 1;
   for (i = 0; i < 20; i=i+1) begin
-    #50;
+    #49;
     o_Rx_Byte = k[i];
     o_Rx_DV = 1;
     #2;
