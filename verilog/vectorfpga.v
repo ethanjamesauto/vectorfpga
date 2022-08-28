@@ -42,70 +42,31 @@ module vectorfpga(
 		.data_pin(data)
 	);
 
-	wire rx_avail;
-	wire [7:0] rx_data;
+	wire buf_ready;
+	reg point_drawn = 1;
+	wire [31:0] point;
 
-	uart_rx uart(
-		.i_Clock(clk),
-		.i_Rx_Serial(rx),
-		.o_Rx_DV(rx_avail),
-		.o_Rx_Byte(rx_data),
-		.test(test)
+	rx_buffer buffer(
+		.clk(clk),
+		.reset(reset),
+
+		.rx(rx),
+		.index(11'b0),
+		.ready(buf_ready),
+		.point(point),
+
+		.test(test),
+		.drawing(drawing)
 	);
 
-	reg state = 0;
-	assign drawing = state;
-
-	parameter WAITING = 0;
-	parameter DRAWING = 1;
-
-	reg [31:0] point_read = 0;
-	reg [1:0] point_offset = 0;
-
-	reg [31:0] point = 0;
-	reg point_drawn = 0;
-	
-	reg [2:0] zero_ctr = 0;
-	
-	parameter max_pts = 20000; //number of points to get before giving up
-	reg [14:0] counter;
-
 	always@(posedge clk) begin
-		if(rx_avail && !reset) begin
-			if (state == WAITING) begin
-				if (rx_data == 0) begin
-					if (zero_ctr == 7) begin
-						state <= DRAWING;
-						counter <= 0;
-						zero_ctr <= 0;
-					end else begin
-						zero_ctr <= zero_ctr + 1;
-					end
-				end else begin
-					zero_ctr <= 0;
-				end
-			end
-			if (state == DRAWING) begin
-				point_read = (point_read << 8) + rx_data;
-				if (point_offset == 3) begin //we received an entire point
-					counter <= counter + 1;
-					point <= point_read;
-					if (point_read == 32'h01010101 || counter >= max_pts) begin //we recieved the "done" command or we give up
-						state <= WAITING;
-					end
-					point_drawn <= 0;
-					point_offset <= 0;
-				end else begin
-					point_offset <= point_offset + 1;
-				end
-			end
-		end
-
 		if (reset) begin
 			draw <= 0;
 			jump <= 0;
 			x <= 0;
 			y <= 0;
+		end else if (buf_ready) begin
+			point_drawn <= 0;
 		end else if (ready && !point_drawn) begin
 			y <= point[11:0];
 			x <= point[23:12];
