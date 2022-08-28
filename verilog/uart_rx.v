@@ -1,4 +1,4 @@
-`define IVERILOG
+//`define IVERILOG
 `ifdef IVERILOG
 module uart_rx 
 (
