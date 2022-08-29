@@ -11,7 +11,7 @@ module rx_buffer
 	//output[11:0] x,
 	//output[11:0] y,
 	//output intensity
-	output [24:0] point,
+	output [29:0] point,
 	output reg [10:0] num_pts,
 	output test,
 	output drawing
