@@ -10,7 +10,7 @@ module uart_rx
   output reg test
 );
 
-reg [7:0] k[19:0];
+reg [7:0] k[39:0];
 integer i;
 
 initial begin
@@ -34,7 +34,31 @@ initial begin
   k[17] = 1;
   k[18] = 1;
   k[19] = 1;
-  for (i = 0; i < 20; i=i+1) begin
+  
+  k[20] = 0;
+  k[21] = 0;
+  k[22] = 0;
+  k[23] = 0;
+  k[24] = 0;
+  k[25] = 0;
+  k[26] = 0;
+  k[27] = 0;
+  k[28] = 1;
+  k[29] = 2;
+  k[30] = 3;
+  k[31] = 4;
+  k[32] = 5;
+  k[33] = 6;
+  k[34] = 7;
+  k[35] = 8;
+  k[36] = 1;
+  k[37] = 1;
+  k[38] = 1;
+  k[39] = 1;
+  for (i = 0; i < 40; i=i+1) begin
+    if (i == 20) begin
+      #300;
+    end
     #49;
     o_Rx_Byte = k[i];
     o_Rx_DV = 1;

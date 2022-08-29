@@ -1,22 +1,26 @@
 module rx_buffer
 #(parameter buffer_size = 2000)
 (
-    input clk,
-    input reset,
+	input clk,
+	input reset,
 
-    input rx,
-    input[10:0] index,
+	input done_drawing,
+	input rx,
+	input[10:0] index,
 
-    output reg ready,
-    //output[11:0] x,
-    //output[11:0] y,
-    //output intensity
-    output reg [31:0] point,
-    output test,
-    output drawing
+	//output[11:0] x,
+	//output[11:0] y,
+	//output intensity
+	output [24:0] point,
+	output reg [10:0] num_pts,
+	output test,
+	output drawing
 );
 	wire rx_avail;
 	wire [7:0] rx_data;
+	
+	reg [1:0] state = 0;
+	assign drawing = state[1];
 
 	uart_rx uart(
 		.i_Clock(clk),
@@ -26,30 +30,50 @@ module rx_buffer
 		.test(test)
 	);
 
-	reg state = 0;
-	assign drawing = state;
 
 	parameter WAITING = 0;
-	parameter DRAWING = 1;
+	parameter READING = 1;
+	parameter DRAWING = 2;
 
 	reg [31:0] point_read = 0;
 	reg [1:0] point_offset = 0;
 	
+	reg [10:0] addr = 0;
+	reg write = 0;
+	reg next = 0;
+
+	blk_mem_gen_v7_3 ram(
+		.clka(clk),
+		
+		.addra(state == DRAWING ? index : addr),
+		.dina(point_read),
+		.wea(write),
+		.douta(point)
+	);
+	
 	reg [2:0] zero_ctr = 0;
 	
-	parameter max_pts = 20000; //number of points to get before giving up
-	reg [14:0] counter;
+	parameter max_pts = buffer_size; //number of points to get before giving up
 
-    always@(posedge clk) begin
-        if (reset) begin
-            ready <= 0;
-        end
-        if(rx_avail && !reset) begin
+	always@(posedge clk) begin
+		if (reset) begin
+		end 
+		if (state == DRAWING && done_drawing) begin
+			state <= WAITING;
+		end 
+		if (next) begin
+			write <= 0;
+			addr <= addr + 1;
+			next <= 0;
+		end
+		
+		if(rx_avail && !reset) begin
 			if (state == WAITING) begin
 				if (rx_data == 0) begin
 					if (zero_ctr == 7) begin
-						state <= DRAWING;
-						counter <= 0;
+						state <= READING;
+						addr <= 0;
+						num_pts <= 0;
 						zero_ctr <= 0;
 					end else begin
 						zero_ctr <= zero_ctr + 1;
@@ -58,22 +82,21 @@ module rx_buffer
 					zero_ctr <= 0;
 				end
 			end
-			if (state == DRAWING) begin
+			if (state == READING) begin
 				point_read = (point_read << 8) + rx_data;
 				if (point_offset == 3) begin //we received an entire point
-					if (point_read == 32'h01010101 || counter >= max_pts) begin //we recieved the "done" command or we give up
-						state <= WAITING;
-                    end else begin
-                    	counter <= counter + 1;
-					    point <= point_read;
-                        ready <= 1;
-                    end
+					if (point_read == 32'h01010101 || num_pts >= max_pts) begin //we recieved the "done" command or we give up
+						state <= DRAWING;
+					end else begin
+						num_pts <= num_pts + 1;
+						write <= 1;
+						next <= 1;
+					end
 					point_offset <= 0;
 				end else begin
-                    ready <= 0;
 					point_offset <= point_offset + 1;
 				end
 			end
 		end
-    end
+	end
 endmodule

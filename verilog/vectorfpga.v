@@ -42,18 +42,20 @@ module vectorfpga(
 		.data_pin(data)
 	);
 
-	wire buf_ready;
-	reg point_drawn = 1;
 	wire [31:0] point;
+	wire [10:0] num_pts;
+	reg done_drawing = 0;
+	reg[10:0] draw_ctr = 0;
 
 	rx_buffer buffer(
 		.clk(clk),
 		.reset(reset),
-
+		
 		.rx(rx),
-		.index(11'b0),
-		.ready(buf_ready),
+		.index(draw_ctr),
 		.point(point),
+		.num_pts(num_pts),
+		.done_drawing(done_drawing),
 
 		.test(test),
 		.drawing(drawing)
@@ -65,13 +67,22 @@ module vectorfpga(
 			jump <= 0;
 			x <= 0;
 			y <= 0;
-		end else if (buf_ready) begin
-			point_drawn <= 0;
-		end else if (ready && !point_drawn) begin
-			y <= point[11:0];
-			x <= point[23:12];
-			jump <= 1;
-			point_drawn <= 1;
+		end else if (ready && drawing) begin
+			if (draw_ctr >= num_pts) begin
+				draw_ctr <= 0;
+				done_drawing <= 1;
+			end else begin
+				x <= point[23:12];
+				y <= point[11:0];
+				if (point[29:24] > 0) begin
+					jump <= 1;
+				end else begin
+					draw <= 1;
+				end
+				draw_ctr <= draw_ctr + 1;
+			end
+		end else if (done_drawing) begin
+			done_drawing <= 0;
 		end
 
 		if (jump) begin
