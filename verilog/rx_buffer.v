@@ -48,7 +48,7 @@ module rx_buffer
 
 
 	reg buffer; //controls which buffer is read from, and which is written to
-	reg [index_bits - 1:0] write_address; //the address to write to
+	reg [index_bits - 1:0] write_address; //the address to write to //TODO: just use the point counters for this
 	reg write; //the ram will be written to if this is set
 
 	//ram module 0 - written to when buffer = 0, read from when buffer = 1
@@ -80,7 +80,7 @@ module rx_buffer
 	assign num_points = buffer == 0 ? point_counter1 : point_counter0;
 
 	always@(posedge clk) begin
-		if (reset) begin
+		if (reset) begin //set initial states for registers
 			uart_state <= UART_WAITING;
 			zero_ctr <= 0;
 
@@ -95,61 +95,62 @@ module rx_buffer
 
 			drawing <= 0;
 		end else begin
-			if (rx_avail) begin
-			if (uart_state == UART_WAITING) begin
-				if (rx_data == 0) begin
-					if (zero_ctr == 7) begin //we've recieved 8 zeros in a row - time to start writing to the buffer
-						uart_state <= UART_READING;
-						write_address <= 0;
-						zero_ctr <= 0;
-						if (buffer == 0) begin
-							point_counter0 <= 0;
+			if (rx_avail) begin //there's a new byte to read
+				//If waiting, wait for 8 0-bytes indicating the start of a frame
+				if (uart_state == UART_WAITING) begin
+					if (rx_data == 0) begin
+						if (zero_ctr == 7) begin //we've recieved 8 zeros in a row - time to start writing to the buffer
+							uart_state <= UART_READING; //we're reading now
+							write_address <= 0;
+							zero_ctr <= 0;
+							if (buffer == 0) begin //reset the number of points in a buffer
+								point_counter0 <= 0;
+							end else begin
+								point_counter1 <= 0;
+							end
 						end else begin
-							point_counter1 <= 0;
+							zero_ctr <= zero_ctr + 1;
 						end
-						drawing <= 1;
 					end else begin
-						zero_ctr <= zero_ctr + 1;
+						zero_ctr <= 0; //if we get a byte that's not a zero, reset the counter. We need 8 in a row
 					end
-				end else begin
-					zero_ctr <= 0;
-				end
 
-			end else if (uart_state == UART_READING) begin
-				point_read = (point_read << 8) + rx_data;
-				if (point_offset == 3) begin //we received an entire point
-					if (point_read == 32'h01010101 || write_address >= buffer_size) begin //we recieved the "done" command or we give up
-						uart_state <= UART_DONE;
+				end else if (uart_state == UART_READING) begin
+					point_read = (point_read << 8) + rx_data; //shift in the next byte into the 4-byte word
+					if (point_offset == 3) begin //we received an entire point
+						if (point_read == 32'h01010101 || write_address >= buffer_size) begin //we received the "done" command or we give up
+							uart_state <= UART_DONE; 
+						end else begin
+							write <= 1; //write the 4-byte word to ram
+						end
+						point_offset <= 0;
 					end else begin
-						write <= 1;
+						point_offset <= point_offset + 1;
 					end
-					point_offset <= 0;
-				end else begin
-					point_offset <= point_offset + 1;
+
+				end else begin //the state is UART_DONE
+
 				end
-
-			end else begin //the state is UART_DONE
-
 			end
-		end
-		if (uart_state == UART_DONE) begin
-			if (!drawing) begin
-				buffer <= !buffer;
-				uart_state <= UART_WAITING;
+			if (uart_state == UART_DONE) begin
+				if (!drawing) begin
+					buffer <= !buffer; //swap buffers
+					uart_state <= UART_WAITING; //go back to waiting for a new frame
+					drawing <= 1; //start drawing
+				end
 			end
-		end
-		if (done_drawing) begin
-			drawing <= 0;
-		end
-		if (write) begin
-			write <= 0;
-			write_address <= write_address + 1;
-			if (buffer == 0) begin
-				point_counter0 <= point_counter0 + 1;
-			end else begin
-				point_counter1 <= point_counter1 + 1;
+			if (done_drawing) begin
+				drawing <= 0; //set the drawing signal low if drawing is complete
 			end
-		end
+			if (write) begin
+				write <= 0; //done with the write
+				write_address <= write_address + 1;
+				if (buffer == 0) begin
+					point_counter0 <= point_counter0 + 1;
+				end else begin
+					point_counter1 <= point_counter1 + 1;
+				end
+			end
 		end
 	end
 
