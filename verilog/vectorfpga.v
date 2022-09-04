@@ -52,9 +52,9 @@ module vectorfpga(
 		.reset(reset),
 		
 		.rx(rx),
-		.index(draw_ctr),
+		.read_address(draw_ctr),
 		.point(point),
-		.num_pts(num_pts),
+		.num_points(num_pts),
 		.done_drawing(done_drawing),
 
 		.test(test),
