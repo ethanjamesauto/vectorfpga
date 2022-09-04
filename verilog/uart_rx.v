@@ -84,7 +84,7 @@ endmodule
 // (10000000)/(115200) = 87
   
 module uart_rx 
-  #(parameter CLKS_PER_BIT = 23)
+  #(parameter CLKS_PER_BIT = 23*2)
   (
    input        i_Clock,
 	input        i_Rx_Serial,

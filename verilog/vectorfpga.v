@@ -42,7 +42,7 @@ module vectorfpga(
 		.data_pin(data)
 	);
 
-	wire [29:0] point;
+	wire [24:0] point;
 	wire [10:0] num_pts;
 	reg done_drawing = 0;
 	reg[10:0] draw_ctr = 0;
@@ -74,7 +74,7 @@ module vectorfpga(
 			end else begin
 				x <= point[23:12];
 				y <= point[11:0];
-				if (point[29:24] > 0) begin
+				if (point[24]) begin
 					draw <= 1;
 				end else begin
 					jump <= 1;

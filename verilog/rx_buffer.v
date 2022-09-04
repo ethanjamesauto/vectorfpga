@@ -11,7 +11,7 @@ module rx_buffer
 	//output[11:0] x,
 	//output[11:0] y,
 	//output intensity
-	output [29:0] point,
+	output [24:0] point,
 	output reg [10:0] num_pts,
 	output test,
 	output drawing
@@ -41,12 +41,16 @@ module rx_buffer
 	reg [10:0] addr = 0;
 	reg write = 0;
 	reg next = 0;
+	
+	wire [24:0] ram_in;
+	assign ram_in [24] = point_read[29:24] > 0;
+	assign ram_in [23:0] = point_read;
 
-	blk_mem_gen_v7_3 ram(
+	ram ram(
 		.clka(clk),
 		
 		.addra(state == DRAWING ? index : addr),
-		.dina(point_read),
+		.dina(ram_in),
 		.wea(write),
 		.douta(point)
 	);
