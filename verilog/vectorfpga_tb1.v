@@ -42,13 +42,6 @@ module vectorfpga_tb1(
 		.data_pin(data)
 	);
 
-	uart_rx uart(
-		.i_Clock(clk),
-		.i_Rx_Serial(rx),
-		.o_Rx_DV(test),
-		.o_Rx_Byte(rx_data)
-	);
-
 	parameter size = 30;
 
 	reg [1:0] state = 0;
