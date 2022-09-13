@@ -140,7 +140,10 @@ module rx_buffer
 				end
 			end
 			if (done_drawing) begin
-				drawing <= 0; //set the drawing signal low if drawing is complete
+				if (uart_state == UART_DONE) begin
+					drawing <= 0; //set the drawing signal low if drawing is complete - this will lead to a buffer swap
+				end
+				//otherwise, do nothing - the current frame will be redrawn
 			end
 			if (write) begin
 				write <= 0; //done with the write
