@@ -1,4 +1,4 @@
-module vectorfpga(
+module vectorfpga_tb1(
 	input clk,
 
 	//UART input 
@@ -49,7 +49,7 @@ module vectorfpga(
 		.o_Rx_Byte(rx_data)
 	);
 
-	parameter size = 4095;
+	parameter size = 30;
 
 	reg [1:0] state = 0;
 	always@(posedge clk) begin
@@ -61,11 +61,11 @@ module vectorfpga(
 		end else if (ready) begin
 			if (state == 0) begin
 				x <= size;
-				y <= 400;
+				y <= size / 10;
 				jump <= 1;
 			end else if (state == 1) begin
 				x <= 0;
-				y <= size - 400;
+				y <= size - size / 10;
 				draw <= 1;
 			end else if (state == 2) begin
 				x <= size;

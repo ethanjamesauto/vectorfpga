@@ -12,7 +12,7 @@ module vectorfpga_tb;
 		$dumpvars;
 	end
 
-	vectorfpga test(
+	vectorfpga_tb1 test(
 		.clk(clk)
 	);
 	
