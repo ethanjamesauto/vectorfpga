@@ -9,7 +9,10 @@ module vectorfpga(
 	//DAC outputs
 	output cs,
 	output dclk,
-	output data
+	output data,
+	
+	//Single beam on/off output
+	output reg beam
 );
 	reg reset = 0;
 	reg [1:0] reset_ctr = 0;
@@ -67,22 +70,26 @@ module vectorfpga(
 			jump <= 0;
 			x <= 0;
 			y <= 0;
+			beam <= 0;
 		end else if (ready && drawing) begin
 			if (draw_ctr >= num_pts) begin
 				draw_ctr <= 0;
 				done_drawing <= 1;
 			end else begin
-				x <= point[23:12];
-				y <= point[11:0];
+				x <= point[23:13];
+				y <= point[11:1];
 				if (point[24]) begin
 					draw <= 1;
+					beam <= 1;
 				end else begin
-					jump <= 1;
+					draw <= 1;
+					beam <= 0;
 				end
 				draw_ctr <= draw_ctr + 1;
 			end
 		end else if (done_drawing) begin
 			done_drawing <= 0;
+			beam <= 0; //turn the beam off after drawing
 		end
 
 		if (jump) begin
