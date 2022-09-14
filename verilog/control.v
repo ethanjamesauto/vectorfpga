@@ -129,7 +129,7 @@ module control(
             end else if (draw_state == WORKING) begin
                 line_next <= 1;
                 dac_axis <= line_axis;
-            end else if (draw_state == POST_DWELLING) begin //TODO: Fix the extra 1 dwell at OFF
+            end else if (draw_state == POST_DWELLING) begin
                 if (dwell == 0) begin
                     draw_state <= OFF;
                 end else begin
