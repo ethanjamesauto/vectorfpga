@@ -104,6 +104,7 @@ module control(
             if (jump_state == PRE_DWELLING) begin
                 if (dwell == 0) begin
                     jump_state <= WORKING;
+                    dac_axis <= 0;
                 end else begin
                     dwell <= dwell - 1;
                 end
