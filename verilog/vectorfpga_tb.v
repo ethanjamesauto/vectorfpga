@@ -2,7 +2,7 @@
 module vectorfpga_tb;
 	reg clk = 0;
 	initial begin
-		repeat(4096 * 5) begin
+		repeat(4096 * 10) begin
 			#1 clk = !clk;
 		end
 	end

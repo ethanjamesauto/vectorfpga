@@ -10,6 +10,7 @@ module control(
 
     output ready,
     output reg beam,
+    input [3:0] shift,
 
     //DAC pins
 	output cs_pin,
@@ -52,6 +53,7 @@ module control(
 		.y_in(y),
 		.x_out(x_out),
 		.y_out(y_out),
+        .shift(shift),
 
 		.ready(line_ready),
 		.axis(line_axis)
@@ -93,12 +95,12 @@ module control(
             beam <= 0;
         end else if (jump) begin 
             jump_state <= PRE_DWELLING;
-            dwell <= 0; //pre-jump dwell
+            dwell <= 5; //pre-jump dwell
             beam <= 0;
         end else if (draw) begin
             draw_state <= PRE_DWELLING;
             line_strobe <= 1; //start the line generation
-            dwell <= 0; //pre-draw dwell
+            dwell <= 5; //pre-draw dwell
             beam <= 1;
         end else if (dac_ready) begin
             if (jump_state == PRE_DWELLING) begin
@@ -110,7 +112,7 @@ module control(
             end else if (jump_state == WORKING) begin
                 dac_axis <= 1;
                 jump_state <= POST_DWELLING;
-                dwell <= 0; //post-jump dwell
+                dwell <= 15; //post-jump dwell
             end else if (jump_state == POST_DWELLING) begin
                 if (dwell == 0) begin
                     jump_state <= OFF;
@@ -142,7 +144,7 @@ module control(
             //outside of the main state machine to ensure that we don't dwell
             //for an extra step
             draw_state <= POST_DWELLING;
-            dwell <= 0; //post-draw dwell
+            dwell <= 5; //post-draw dwell
         end else if (line_next) begin
             line_next <= 0; //line_next should only be on for a clock cycle
         end else if (line_strobe) begin

@@ -12,7 +12,7 @@ module vectorfpga(
 	output data,
 	
 	//Single beam on/off output
-	output beam
+	output reg beam
 );
 	reg reset = 0;
 	reg [1:0] reset_ctr = 0;
@@ -30,6 +30,7 @@ module vectorfpga(
 	wire ready;
 	reg [11:0] x;
 	reg [11:0] y;
+	reg [3:0] shift;
 
 	control line_draw(
 		.clk(clk),
@@ -39,7 +40,8 @@ module vectorfpga(
 		.draw(draw),
 		.jump(jump),
 		.ready(ready),
-		.beam(beam),
+		//.beam(beam),
+		.shift(shift),
 
 		.cs_pin(cs),
 		.clk_pin(dclk),
@@ -64,13 +66,14 @@ module vectorfpga(
 		.test(test),
 		.drawing(drawing)
 	);
-
 	always@(posedge clk) begin
 		if (reset) begin
 			draw <= 0;
 			jump <= 0;
 			x <= 0;
 			y <= 0;
+			shift <= 0;
+			beam <= 0;
 		end else if (ready && drawing) begin
 			if (draw_ctr >= num_pts) begin
 				draw_ctr <= 0;
@@ -80,8 +83,12 @@ module vectorfpga(
 				y <= point[11:1];
 				if (point[24]) begin
 					draw <= 1;
+					beam <= 1;
+					shift <= 0;
 				end else begin
-					jump <= 1;
+					draw <= 1;
+					beam <= 0;
+					shift <= 0;
 				end
 				draw_ctr <= draw_ctr + 1;
 			end

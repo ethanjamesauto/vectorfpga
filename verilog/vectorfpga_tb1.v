@@ -27,6 +27,7 @@ module vectorfpga_tb1(
 	wire ready;
 	reg [11:0] x;
 	reg [11:0] y;
+	reg [3:0] shift;
 
 	control line_draw(
 		.clk(clk),
@@ -36,13 +37,14 @@ module vectorfpga_tb1(
 		.draw(draw),
 		.jump(jump),
 		.ready(ready),
+		.shift(shift),
 
 		.cs_pin(cs),
 		.clk_pin(dclk),
 		.data_pin(data)
 	);
 
-	parameter size = 30;
+	parameter size = 100;
 
 	reg [1:0] state = 0;
 	always@(posedge clk) begin
@@ -51,23 +53,28 @@ module vectorfpga_tb1(
 			jump <= 0;
 			x <= 0;
 			y <= 0;
+			shift <= 0;
 		end else if (ready) begin
 			if (state == 0) begin
 				x <= size;
 				y <= size / 10;
-				jump <= 1;
+				draw <= 1;
+				shift <= 3;
 			end else if (state == 1) begin
 				x <= 0;
 				y <= size - size / 10;
 				draw <= 1;
+				shift <= 1;
 			end else if (state == 2) begin
 				x <= size;
 				y <= size;
 				draw <= 1;
+				shift <= 1;
 			end else begin
 				x <= 0;
 				y <= 0;
 				draw <= 1;
+				shift <= 1;
 			end
 			state <= state + 1;
 		end
