@@ -69,7 +69,7 @@ module vectorfpga(
 	always@(posedge clk) begin
 		if (reset) begin
 			draw <= 0;
-			jump <= 0;
+			jump <= 1; //TODO: find out why having this as 0 breaks the whole thing
 			x <= 0;
 			y <= 0;
 			shift <= 0;
@@ -78,17 +78,18 @@ module vectorfpga(
 			if (draw_ctr >= num_pts) begin
 				draw_ctr <= 0;
 				done_drawing <= 1;
+				beam <= 0;
 			end else begin
-				x <= point[23:13];
-				y <= point[11:1];
+				x <= point[23:12];
+				y <= point[11:0];
 				if (point[24]) begin
 					draw <= 1;
 					beam <= 1;
-					shift <= 0;
+					shift <= 1;
 				end else begin
 					draw <= 1;
 					beam <= 0;
-					shift <= 0;
+					shift <= 2;
 				end
 				draw_ctr <= draw_ctr + 1;
 			end
