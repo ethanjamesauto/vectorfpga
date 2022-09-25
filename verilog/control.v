@@ -7,6 +7,7 @@ module control(
 
     input jump,
     input draw,
+    input travel,
 
     output ready,
     output reg beam,
@@ -95,13 +96,12 @@ module control(
             beam <= 0;
         end else if (jump) begin 
             jump_state <= PRE_DWELLING;
-            dwell <= 15; //pre-jump dwell
+            dwell <= 0; //pre-jump dwell
             beam <= 0;
         end else if (draw) begin
             draw_state <= PRE_DWELLING;
             line_strobe <= 1; //start the line generation
-            dwell <= 0; //pre-draw dwell
-            beam <= 1;
+            dwell <= travel ? 10 : 0; //pre-draw dwell
         end else if (dac_ready) begin
             if (jump_state == PRE_DWELLING) begin
                 if (dwell == 0) begin
@@ -112,7 +112,7 @@ module control(
             end else if (jump_state == WORKING) begin
                 dac_axis <= 1;
                 jump_state <= POST_DWELLING;
-                dwell <= 50; //post-jump dwell
+                dwell <= 150; //post-jump dwell
             end else if (jump_state == POST_DWELLING) begin
                 if (dwell == 0) begin
                     jump_state <= OFF;
@@ -129,12 +129,16 @@ module control(
                     dwell <= dwell - 1;
                 end
             end else if (draw_state == WORKING) begin
+				beam <= !travel;
                 line_next <= 1;
                 dac_axis <= line_axis;
             end else if (draw_state == POST_DWELLING) begin
                 if (dwell == 0) begin
                     draw_state <= OFF;
                 end else begin
+                    //if (dwell < 4) begin
+                    //    beam <= 1;
+                    //end
                     dwell <= dwell - 1;
                 end
             end
@@ -144,7 +148,8 @@ module control(
             //outside of the main state machine to ensure that we don't dwell
             //for an extra step
             draw_state <= POST_DWELLING;
-            dwell <= 10; //post-draw dwell
+            dwell <= travel ? 10 : 3; //post-draw dwell
+            //beam <= 0;
         end else if (line_next) begin
             line_next <= 0; //line_next should only be on for a clock cycle
         end else if (line_strobe) begin

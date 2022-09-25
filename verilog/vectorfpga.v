@@ -12,7 +12,7 @@ module vectorfpga(
 	output data,
 	
 	//Single beam on/off output
-	output reg beam
+	output beam
 );
 	reg reset = 0;
 	reg [1:0] reset_ctr = 0;
@@ -28,9 +28,12 @@ module vectorfpga(
 	reg draw;
 	reg jump;
 	wire ready;
+	wire beam_control;
 	reg [11:0] x;
 	reg [11:0] y;
 	reg [3:0] shift;
+	reg travel;
+	reg enable_output;
 
 	control line_draw(
 		.clk(clk),
@@ -40,8 +43,9 @@ module vectorfpga(
 		.draw(draw),
 		.jump(jump),
 		.ready(ready),
-		//.beam(beam),
+		.beam(beam_control),
 		.shift(shift),
+		.travel(travel),
 
 		.cs_pin(cs),
 		.clk_pin(dclk),
@@ -66,6 +70,9 @@ module vectorfpga(
 		.test(test),
 		.drawing(drawing)
 	);
+	
+	assign beam = beam_control && enable_output;
+	
 	always@(posedge clk) begin
 		if (reset) begin
 			draw <= 0;
@@ -73,23 +80,26 @@ module vectorfpga(
 			x <= 0;
 			y <= 0;
 			shift <= 0;
-			beam <= 0;
+			travel <= 0;
+			enable_output <= 0;
 		end else if (ready && drawing) begin
 			if (draw_ctr >= num_pts) begin
 				draw_ctr <= 0;
 				done_drawing <= 1;
-				beam <= 0;
+				enable_output <= 0;
 			end else begin
 				x <= point[23:12];
 				y <= point[11:0];
+				enable_output <= 1;
 				if (point[24]) begin
 					draw <= 1;
-					beam <= 1;
-					shift <= 1;
+					//travel <= 0;
+					shift <= 0;
 				end else begin
-					draw <= 1;
-					beam <= 0;
-					shift <= 2;
+					jump <= 1;
+					//draw <= 1;
+					//travel <= 1;
+					//shift <= 5;
 				end
 				draw_ctr <= draw_ctr + 1;
 			end
